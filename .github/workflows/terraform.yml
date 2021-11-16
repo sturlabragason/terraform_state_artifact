@@ -1,0 +1,24 @@
+name: Terraform State Artifact
+on: [push]
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    name: Using terraform_state_artifact action
+    steps:
+      - id: terraform_plan
+        uses: sturlabragason/terraform_state_artifact@main
+        with:
+          encryptionkey: ${{ secrets.pat }}
+          plan: true
+          apply: false
+        env:
+          TF_VAR_run_id: ${{ github.run_id }}
+      - id: terraform_apply
+        uses: sturlabragason/terraform_state_artifact@main
+        with:
+          encryptionkey: ${{ secrets.pat }}
+          plan: false
+          apply: true
+        env:
+          TF_VAR_run_id: ${{ github.run_id }}

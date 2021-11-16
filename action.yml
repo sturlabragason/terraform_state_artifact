@@ -1,0 +1,58 @@
+name: 'Run Terraform'
+description: 'Sets up and runs Terraform, and creates an encrypted Terraform artifact'
+inputs:
+  encryptionkey:
+    description: 'Used to read artifact and as a key to encrypt and decrypt the state file artifact'
+    required: true
+  plan:
+    description: 'terraform plan'
+    required: false
+    default: true
+  apply:
+    description: 'terraform apply'
+    required: false
+    default: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+    - uses: hashicorp/setup-terraform@v1
+    - id: terraform
+      run: |
+        $Repo = "${{ github.repository }}"
+        $BaseUri = "https://api.github.com"
+        $ArtifactUri = "$BaseUri/repos/$Repo/actions/artifacts"
+        $Token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText
+        $RestResponse = Invoke-RestMethod -Authentication Bearer -Uri $ArtifactUri -Token $Token | Select-Object -ExpandProperty artifacts
+        if ($RestResponse){
+          $MostRecentArtifactURI = $RestResponse | Sort-Object -Property created_at -Descending | Select-Object -First 1 | Select-Object -ExpandProperty archive_download_url
+          Write-Host "Most recent artifact URI = $MostRecentArtifactURI"
+          if ($MostRecentArtifactURI){
+            Invoke-RestMethod -uri $MostRecentArtifactURI -Token $Token -Authentication bearer -outfile ./state.zip
+            Expand-Archive ./state.zip
+            openssl enc -d -in ./state/terraform.tfstate.enc -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ./terraform.tfstate
+          }
+        }
+        terraform init
+        $terraformplan = "${{ inputs.plan }}"
+        $terraformapply = "${{ inputs.apply }}"
+        if ($terraformplan){
+          if (!$terraformapply){
+            terraform plan -out=./terraform.plan
+          } else {
+            terraform plan
+          }
+        }
+        if ($terraformapply){
+          if (!$terraformplan){
+            terraform apply -auto-approve ./terraform.plan
+          } else {
+            terraform apply -auto-approve
+          }
+        }
+        openssl enc -in ./terraform.tfstate -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ./terraform.tfstate.enc
+      shell: pwsh
+    - uses: actions/upload-artifact@v2
+      with:
+        name: terraformstatefile
+        path: ./terraform.tfstate.enc
