@@ -1,4 +1,4 @@
-name: 'Run Terraform'
+name: 'terraform_state_artifact'
 description: 'Sets up and runs Terraform, and creates an encrypted Terraform artifact'
 inputs:
   encryptionkey:
