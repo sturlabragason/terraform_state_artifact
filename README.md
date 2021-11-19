@@ -8,7 +8,7 @@ The [`sturlabragason/terraform_state_artifact`](https://github.com/sturlabragaso
 
 ```yaml
 steps:
-- uses: sturlabragason/terraform_state_artifact@main
+- uses: sturlabragason/terraform_state_artifact@v1
     with:
         encryptionkey: ${{ secrets.encryptionkey }}
 ```
@@ -17,7 +17,7 @@ You can choose to run only plan or apply
 
 ```yaml
 steps:
-- uses: sturlabragason/terraform_state_artifact@main
+- uses: sturlabragason/terraform_state_artifact@v1
     with:
         encryptionkey: ${{ secrets.encryptionkey }}
         plan: true
