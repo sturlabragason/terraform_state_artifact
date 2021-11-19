@@ -1,5 +1,6 @@
 name: 'terraform_state_artifact'
 description: 'Sets up and runs Terraform, and creates an encrypted Terraform artifact'
+author: 'Sturla Bragason'
 inputs:
   encryptionkey:
     description: 'Used to read artifact and as a key to encrypt and decrypt the state file artifact'
@@ -56,3 +57,6 @@ runs:
       with:
         name: terraformstatefile
         path: ./terraform.tfstate.enc
+branding:
+  icon: 'cloud'
+  color: 'gray-dark'
