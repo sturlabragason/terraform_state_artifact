@@ -2,9 +2,19 @@ name: Terraform State Artifact
 on: [push]
 
 jobs:
-  terraform:
+  terraform_in_one_step:
     runs-on: ubuntu-latest
     name: Using terraform_state_artifact action
+    steps:
+      - id: terraform_plan
+        uses: sturlabragason/terraform_state_artifact@main
+        with:
+          encryptionkey: ${{ secrets.pat }}
+        env:
+          TF_VAR_run_id: ${{ github.run_id }}
+  terraform_two_steps:
+    runs-on: ubuntu-latest
+    name: Using terraform_state_artifact action in seperate steps with parameters
     steps:
       - id: terraform_plan
         uses: sturlabragason/terraform_state_artifact@main
