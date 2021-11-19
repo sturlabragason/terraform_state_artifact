@@ -7,7 +7,7 @@ jobs:
     name: Using terraform_state_artifact action
     steps:
       - id: terraform_plan
-        uses: sturlabragason/terraform_state_artifact@main
+        uses: sturlabragason/terraform_state_artifact@v1
         with:
           encryptionkey: ${{ secrets.pat }}
         env:
@@ -17,7 +17,7 @@ jobs:
     name: Using terraform_state_artifact action in seperate steps with parameters
     steps:
       - id: terraform_plan
-        uses: sturlabragason/terraform_state_artifact@main
+        uses: sturlabragason/terraform_state_artifact@v1
         with:
           encryptionkey: ${{ secrets.pat }}
           plan: true
@@ -25,7 +25,7 @@ jobs:
         env:
           TF_VAR_run_id: ${{ github.run_id }}
       - id: terraform_apply
-        uses: sturlabragason/terraform_state_artifact@main
+        uses: sturlabragason/terraform_state_artifact@v1
         with:
           encryptionkey: ${{ secrets.pat }}
           plan: false
