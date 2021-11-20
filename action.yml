@@ -37,6 +37,12 @@ runs:
         terraform init
         $terraformplan = "${{ inputs.plan }}"
         $terraformapply = "${{ inputs.apply }}"
+        if ($terraformplan -eq "false"){
+          $terraformplan = $false
+        }
+        if ($terraformapply -eq "false"){
+          $terraformapply = $false
+        }
         if ($terraformplan){
           if (!$terraformapply){
             terraform plan -out=./terraform.plan
