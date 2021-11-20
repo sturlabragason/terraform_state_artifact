@@ -45,7 +45,7 @@ runs:
         }
         if ($terraformplan){
           if (!$terraformapply){
-            terraform plan -out=terraform.plan
+            terraform plan -out ./terraform.plan
           } else {
             terraform plan
           }
