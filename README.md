@@ -13,7 +13,7 @@ steps:
         encryptionkey: ${{ secrets.encryptionkey }}
 ```
 
-You can choose to disable apply:
+You can choose to skip `terraform apply`:
 
 ```yaml
 steps:
@@ -23,7 +23,7 @@ steps:
         apply: false
 ```
 
-You can choose to add custom flags to terraform plan:
+You can choose to add custom flags to `terraform plan`:
 
 ```yaml
 steps:
