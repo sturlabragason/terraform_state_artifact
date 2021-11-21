@@ -5,10 +5,6 @@ inputs:
   encryptionkey:
     description: 'Used to read artifact and as a key to encrypt and decrypt the state file artifact'
     required: true
-  plan:
-    description: 'terraform plan'
-    required: false
-    default: true
   apply:
     description: 'terraform apply'
     required: false
@@ -35,29 +31,15 @@ runs:
           }
         }
         terraform init
-        $terraformplan = "${{ inputs.plan }}"
         $terraformapply = "${{ inputs.apply }}"
-        if ($terraformplan -eq "false"){
-          $terraformplan = $false
-        }
         if ($terraformapply -eq "false"){
           $terraformapply = $false
         }
-        if ($terraformplan){
-          if (!$terraformapply){
-            terraform plan -out ./terraform.plan
-          } else {
-            terraform plan
-          }
-        }
+        terraform plan
         if ($terraformapply){
-          if (!$terraformplan){
-            terraform apply -auto-approve ./terraform.plan
-          } else {
-            terraform apply -auto-approve
-          }
+          terraform apply -auto-approve
+          openssl enc -in ./terraform.tfstate -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ./terraform.tfstate.enc
         }
-        openssl enc -in ./terraform.tfstate -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ./terraform.tfstate.enc
       shell: pwsh
     - uses: actions/upload-artifact@v2
       with:

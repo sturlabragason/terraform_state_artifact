@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Using terraform_state_artifact action
     steps:
-      - id: terraform_plan
+      - id: terrafrom_state_artifact
         uses: sturlabragason/terraform_state_artifact@v1
         with:
           encryptionkey: ${{ secrets.pat }}
@@ -14,21 +14,12 @@ jobs:
           TF_VAR_run_id: ${{ github.run_id }}
   terraform_two_steps:
     runs-on: ubuntu-latest
-    name: Using terraform_state_artifact action in seperate steps with parameters
+    name: Using terraform_state_artifact action without apply
     steps:
-      - id: terraform_plan
+      - id: terraform_apply_false
         uses: sturlabragason/terraform_state_artifact@v1
         with:
           encryptionkey: ${{ secrets.pat }}
-          plan: true
           apply: false
-        env:
-          TF_VAR_run_id: ${{ github.run_id }}
-      - id: terraform_apply
-        uses: sturlabragason/terraform_state_artifact@v1
-        with:
-          encryptionkey: ${{ secrets.pat }}
-          plan: false
-          apply: true
         env:
           TF_VAR_run_id: ${{ github.run_id }}

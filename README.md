@@ -13,14 +13,13 @@ steps:
         encryptionkey: ${{ secrets.encryptionkey }}
 ```
 
-You can choose to run only plan or apply
+You can choose to disable apply:
 
 ```yaml
 steps:
 - uses: sturlabragason/terraform_state_artifact@v1
     with:
         encryptionkey: ${{ secrets.encryptionkey }}
-        plan: true
         apply: false
 ```
 
@@ -31,8 +30,7 @@ The action supports the following inputs:
 | Variable        | Description                                                                                                                             | Default |
 |-----------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------|
 | `encryptionkey` | An encryption key to use when encrypting the statefile. Recommended to use a secret value.                                              | N/A     |
-| `plan`          | (optional) Whether to run the `terraform plan` command. If `apply` is set to false it will output a plan file under `./terraform.plan`. | `true`  |
-| `apply`         | (optional) Whether to run the `terraform apply` command. If `plan` is set to false it will use a plan `./terraform.plan`.               | `true`  |
+| `apply`         | (optional) Whether to run the `terraform apply` command.               | `true`  |
 
 ## License
 
