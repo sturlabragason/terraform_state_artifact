@@ -2,7 +2,7 @@ name: Terraform State Artifact
 on: [push]
 
 jobs:
-  terraform_in_one_step:
+  terraform_default_job:
     runs-on: ubuntu-latest
     name: Using terraform_state_artifact action
     steps:
@@ -12,7 +12,7 @@ jobs:
           encryptionkey: ${{ secrets.pat }}
         env:
           TF_VAR_run_id: ${{ github.run_id }}
-  terraform_two_steps:
+  terraform_apply_false_job:
     runs-on: ubuntu-latest
     name: Using terraform_state_artifact action without apply
     steps:
@@ -21,5 +21,28 @@ jobs:
         with:
           encryptionkey: ${{ secrets.pat }}
           apply: false
+        env:
+          TF_VAR_run_id: ${{ github.run_id }}
+  terraform_plan_custom_job:
+    runs-on: ubuntu-latest
+    name: Using terraform_state_artifact with custom plan flag
+    steps:
+      - id: terraform_plan_custom
+        uses: sturlabragason/terraform_state_artifact@v1
+        with:
+          encryptionkey: ${{ secrets.pat }}
+          apply: false
+          custom_plan_flags: '-refresh-only'
+        env:
+          TF_VAR_run_id: ${{ github.run_id }}
+  terraform_apply_custom_job:
+    runs-on: ubuntu-latest
+    name: Using terraform_state_artifact with custom apply flag
+    steps:
+      - id: terraform_apply_custom
+        uses: sturlabragason/terraform_state_artifact@v1
+        with:
+          encryptionkey: ${{ secrets.pat }}
+          custom_apply_flags: '-no-color'
         env:
           TF_VAR_run_id: ${{ github.run_id }}

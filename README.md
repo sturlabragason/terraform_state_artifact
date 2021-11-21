@@ -23,6 +23,27 @@ steps:
         apply: false
 ```
 
+You can choose to add custom flags to terraform plan:
+
+```yaml
+steps:
+- uses: sturlabragason/terraform_state_artifact@v1
+    with:
+        encryptionkey: ${{ secrets.encryptionkey }}
+        apply: false
+        custom_plan_flags: '-refresh-only'
+```
+
+You can choose to add custom flags to `terraform apply`:
+
+```yaml
+steps:
+- uses: sturlabragason/terraform_state_artifact@v1
+    with:
+        encryptionkey: ${{ secrets.encryptionkey }}
+        custom_apply_flags: '-no-color'
+```
+
 ## Inputs
 
 The action supports the following inputs:
@@ -31,6 +52,8 @@ The action supports the following inputs:
 |-----------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------|
 | `encryptionkey` | An encryption key to use when encrypting the statefile. Recommended to use a secret value.                                              | N/A     |
 | `apply`         | (optional) Whether to run the `terraform apply` command.               | `true`  |
+| `custom_plan_flags`         | (optional) Add a custom flag to the `terraform plan` command.               | ``  |
+| `custom_apply_flags`         | (optional) Add a custom flag to the `terraform apply` command.               | ``  |
 
 ## License
 
