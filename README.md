@@ -1,6 +1,6 @@
 # terraform_state_artifact
 
-[![Terraform State Artifact](https://github.com/sturlabragason/terraform_state_artifact/actions/workflows/terraform.yml/badge.svg?branch=main)](https://github.com/sturlabragason/terraform_state_artifact/actions/workflows/terraform.yml)
+[![Terraform State Artifact](https://github.com/sturlabragason/terraform_state_artifact/actions/workflows/terraform.yml/badge.svg)](https://github.com/sturlabragason/terraform_state_artifact/actions/workflows/terraform.yml)
 
 The [`sturlabragason/terraform_state_artifact`](https://github.com/sturlabragason/terraform_state_artifact) action is a composite action that stores your Terraform state file as an encrypted Github workflow artifact and downloads and decrypts the state on subsequent runs. Built-in are the actions: [`actions/checkout@v2`](https://github.com/actions/checkout), [`hashicorp/setup-terraform@v1`](https://github.com/hashicorp/setup-terraform) and [`actions/upload-artifact@v2`](https://github.com/actions/upload-artifact).
 
