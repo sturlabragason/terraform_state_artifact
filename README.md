@@ -4,6 +4,8 @@
 
 The [`sturlabragason/terraform_state_artifact`](https://github.com/sturlabragason/terraform_state_artifact) action is a composite action that stores your Terraform state file as an encrypted Github workflow artifact and downloads and decrypts the state on subsequent runs. Built-in are the actions: [`actions/checkout@v2`](https://github.com/actions/checkout), [`hashicorp/setup-terraform@v1`](https://github.com/hashicorp/setup-terraform) and [`actions/upload-artifact@v2`](https://github.com/actions/upload-artifact).
 
+Be aware that [Github delets artifacts older then 90 days](https://docs.github.com/en/organizations/managing-organization-settings/configuring-the-retention-period-for-github-actions-artifacts-and-logs-in-your-organization) by default. You can [run your pipeline on a schedule](https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#scheduled-events) to create a new artifact at least once every 90 days.
+
 ## [:rocket: What this action does: :rocket:](https://dev.to/sturlabragason/terraformstateartifact-github-action-keeping-the-statefile-with-to-your-code-4d3b)
 
 - 🛠️ First off, it downloads your repository with [`actions/checkout@v2`](https://github.com/actions/checkout) and then installs terraform using [`hashicorp/setup-terraform@v1`](https://github.com/hashicorp/setup-terraform).
