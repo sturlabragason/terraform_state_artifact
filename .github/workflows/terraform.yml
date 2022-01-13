@@ -1,5 +1,11 @@
 name: Terraform State Artifact
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron:  '11 11 11 * *'
+
 
 jobs:
   terraform_default_job:
