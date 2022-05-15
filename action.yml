@@ -1,63 +1,53 @@
 name: 'terraform_state_artifact'
-description: 'Sets up and runs Terraform, and creates an encrypted Terraform artifact'
+description: 'Downloads and uploads your Terraform statefile as an encrypted Github Artifact'
 author: 'Sturla Bragason'
 inputs:
   encryptionkey:
-    description: 'Used to read artifact and as a key to encrypt and decrypt the state file artifact'
+    description: 'Used as a key to encrypt and decrypt the statefile artifact'
     required: true
-  apply:
-    description: 'terraform apply'
-    required: false
-    default: true
-  custom_plan_flags:
-    description: 'Add custom flags to the terraform plan command'
+  statefile_location:
+    description: 'Specify the location of your Terraform statefile.'
     required: false
     default: ''
-  custom_apply_flags:
-    description: 'Add custom flags to the terraform apply command'
-    required: false
+  download_upload:
+    description: 'Specify whether to download and decrypt or upload and encrypt.'
+    required: true
     default: ''
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v2
-    - uses: hashicorp/setup-terraform@v1
-    - id: terraform
+    - id: terraform_state_artifact_download
+      if: ${{ github.event.inputs.download_upload == 'download' }}
       run: |
+        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
         $Repo = "${{ github.repository }}"
         $BaseUri = "https://api.github.com"
         $ArtifactUri = "$BaseUri/repos/$Repo/actions/artifacts"
         $Token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText
         $RestResponse = Invoke-RestMethod -Authentication Bearer -Uri $ArtifactUri -Token $Token | Select-Object -ExpandProperty artifacts
         if ($RestResponse){
-          $MostRecentArtifactURI = $RestResponse | Sort-Object -Property created_at -Descending | where name -eq "terraformstatefile" | Select-Object -First 1 | Select-Object -ExpandProperty archive_download_url
+          $MostRecentArtifactURI = $RestResponse | Sort-Object -Property created_at -Descending | where name -eq $ArtifactName | Select-Object -First 1 | Select-Object -ExpandProperty archive_download_url
           Write-Host "Most recent artifact URI = $MostRecentArtifactURI"
           if ($MostRecentArtifactURI){
             Invoke-RestMethod -uri $MostRecentArtifactURI -Token $Token -Authentication bearer -outfile ./state.zip
             Expand-Archive ./state.zip
-            openssl enc -d -in ./state/terraform.tfstate.enc -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ./terraform.tfstate
+            openssl enc -d -in ./state/terraform.tfstate.enc -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ."${{ inputs.statefile_location }}"/terraform.tfstate
           }
         }
-        terraform init
-        $terraformapply = "${{ inputs.apply }}"
-        $custom_plan_flags = "${{ inputs.custom_plan_flags }}"
-        $custom_apply_flags = "${{ inputs.custom_apply_flags }}"
-        if ($terraformapply -eq "false"){
-          $terraformapply = $false
-        }
-        terraform plan $custom_plan_flags
-        if ($terraformapply){
-          terraform apply -auto-approve $custom_apply_flags
-        }
-        $StateExists = Test-Path -Path ./terraform.tfstate -PathType Leaf
+      shell: pwsh
+    - id: terraform_state_artifact_upload
+      if: ${{ github.event.inputs.download_upload == 'upload' }}
+      run: |
+        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
+        $StateExists = Test-Path -Path ."${{ inputs.statefile_location }}"/terraform.tfstate -PathType Leaf
         if ($StateExists){
-          openssl enc -in ./terraform.tfstate -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ./terraform.tfstate.enc
+          openssl enc -in ."${{ inputs.statefile_location }}"/terraform.tfstate -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ."${{ inputs.statefile_location }}"/terraform.tfstate.enc
         }
       shell: pwsh
     - uses: actions/upload-artifact@v2
       with:
         name: terraformstatefile
-        path: ./terraform.tfstate.enc
+        path: ."${{ inputs.statefile_location }}"/terraform.tfstate.enc
 branding:
   icon: 'cloud'
   color: 'gray-dark'

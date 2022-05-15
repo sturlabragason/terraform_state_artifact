@@ -8,47 +8,21 @@ on:
 
 
 jobs:
-  terraform_default_job:
+  terraform_download_job:
     runs-on: ubuntu-latest
-    name: Using terraform_state_artifact action
+    name: Downloading terraform_state_artifact
     steps:
-      - id: terrafrom_state_artifact
-        uses: sturlabragason/terraform_state_artifact@v1
+      - id: terrafrom_artifact_download
+        uses: sturlabragason/terraform_state_artifact@v2
         with:
           encryptionkey: ${{ secrets.pat }}
-        env:
-          TF_VAR_run_id: ${{ github.run_id }}
-  terraform_apply_false_job:
+          download_upload: download
+  terraform_upload_job:
     runs-on: ubuntu-latest
-    name: Using terraform_state_artifact action without apply
+    name: Uploading terraform_state_artifact
     steps:
-      - id: terraform_apply_false
-        uses: sturlabragason/terraform_state_artifact@v1
+      - id: terrafrom_artifact_upload
+        uses: sturlabragason/terraform_state_artifact@v2
         with:
           encryptionkey: ${{ secrets.pat }}
-          apply: false
-        env:
-          TF_VAR_run_id: ${{ github.run_id }}
-  terraform_plan_custom_job:
-    runs-on: ubuntu-latest
-    name: Using terraform_state_artifact with custom plan flag
-    steps:
-      - id: terraform_plan_custom
-        uses: sturlabragason/terraform_state_artifact@v1
-        with:
-          encryptionkey: ${{ secrets.pat }}
-          apply: false
-          custom_plan_flags: '-refresh-only'
-        env:
-          TF_VAR_run_id: ${{ github.run_id }}
-  terraform_apply_custom_job:
-    runs-on: ubuntu-latest
-    name: Using terraform_state_artifact with custom apply flag
-    steps:
-      - id: terraform_apply_custom
-        uses: sturlabragason/terraform_state_artifact@v1
-        with:
-          encryptionkey: ${{ secrets.pat }}
-          custom_apply_flags: '-no-color'
-        env:
-          TF_VAR_run_id: ${{ github.run_id }}
+          download_upload: upload
