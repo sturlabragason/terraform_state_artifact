@@ -25,5 +25,5 @@ jobs:
       - id: state-upload
         uses: devgioele/terraform-state-artifact@v3
         with:
-          encryption-key: ${{ secrets.pat }}
+          passphrase: ${{ secrets.TF-STATE-PASSPHRASE }}
           download-upload: upload
