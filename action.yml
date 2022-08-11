@@ -1,25 +1,26 @@
-name: 'terraform_state_artifact'
+name: terraform-state-artifact
 description: 'Downloads and uploads your Terraform statefile as an encrypted Github Artifact'
-author: 'Sturla Bragason'
+author: 'Sturla Bragason & Gioele De Vitti'
+
 inputs:
-  encryptionkey:
+  encryption-key:
     description: 'Used as a key to encrypt and decrypt the statefile artifact'
     required: true
-  statefile_location:
-    description: 'Specify the location of your Terraform statefile.'
+  download-upload:
+    description: 'Whether to download and decrypt or upload and encrypt.'
+    required: true
+  statefile-location:
+    description: 'The location of your Terraform statefile.'
     required: false
     default: ''
-  download_upload:
-    description: 'Specify whether to download and decrypt or upload and encrypt.'
-    required: true
-    default: ''
+
 runs:
   using: "composite"
   steps:
-    - id: terraform_state_artifact_download
-      if: ${{ github.event.inputs.download_upload == 'download' }}
+    - id: terraform-state-artifact-download
+      if: ${{ github.event.inputs.download-upload == 'download' }}
       run: |
-        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
+        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile-location }}"
         $Repo = "${{ github.repository }}"
         $BaseUri = "https://api.github.com"
         $ArtifactUri = "$BaseUri/repos/$Repo/actions/artifacts"
@@ -31,23 +32,24 @@ runs:
           if ($MostRecentArtifactURI){
             Invoke-RestMethod -uri $MostRecentArtifactURI -Token $Token -Authentication bearer -outfile ./state.zip
             Expand-Archive ./state.zip
-            openssl enc -d -in ./state/terraform.tfstate.enc -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ."${{ inputs.statefile_location }}"/terraform.tfstate
+            openssl enc -d -in ./state/terraform.tfstate.enc -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryption-key }}" -out ."${{ inputs.statefile-location }}"/terraform.tfstate
           }
         }
       shell: pwsh
-    - id: terraform_state_artifact_upload
-      if: ${{ github.event.inputs.download_upload == 'upload' }}
+    - id: terraform-state-artifact-upload
+      if: ${{ github.event.inputs.download-upload == 'upload' }}
       run: |
-        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
-        $StateExists = Test-Path -Path ."${{ inputs.statefile_location }}"/terraform.tfstate -PathType Leaf
+        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile-location }}"
+        $StateExists = Test-Path -Path ."${{ inputs.statefile-location }}"/terraform.tfstate -PathType Leaf
         if ($StateExists){
-          openssl enc -in ."${{ inputs.statefile_location }}"/terraform.tfstate -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ."${{ inputs.statefile_location }}"/terraform.tfstate.enc
+          openssl enc -in ."${{ inputs.statefile-location }}"/terraform.tfstate -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryption-key }}" -out ."${{ inputs.statefile-location }}"/terraform.tfstate.enc
         }
       shell: pwsh
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
+      if: ${{ github.event.inputs.download-upload == 'upload' }}
       with:
-        name: terraformstatefile
-        path: ."${{ inputs.statefile_location }}"/terraform.tfstate.enc
+        name: terraform-state
+        path: ."${{ inputs.statefile-location }}"/terraform.tfstate.enc
 branding:
   icon: 'cloud'
   color: 'gray-dark'

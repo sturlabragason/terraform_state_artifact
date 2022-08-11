@@ -1,28 +1,29 @@
 name: Terraform State Artifact
+
 on:
   push:
     branches:
       - main
   schedule:
+    # Every month
     - cron:  '11 11 11 * *'
 
-
 jobs:
-  terraform_download_job:
+  terraform-download-job:
     runs-on: ubuntu-latest
-    name: Downloading terraform_state_artifact
+    name: Downloading Terraform state
     steps:
-      - id: terrafrom_artifact_download
-        uses: sturlabragason/terraform_state_artifact@v2
+      - id: state-download
+        uses: devgioele/terraform-state-artifact@v3
         with:
-          encryptionkey: ${{ secrets.pat }}
-          download_upload: download
-  terraform_upload_job:
+          encryption-key: ${{ secrets.pat }}
+          download-upload: download
+  terraform-upload-job:
     runs-on: ubuntu-latest
-    name: Uploading terraform_state_artifact
+    name: Uploading Terraform state
     steps:
-      - id: terrafrom_artifact_upload
-        uses: sturlabragason/terraform_state_artifact@v2
+      - id: state-upload
+        uses: devgioele/terraform-state-artifact@v3
         with:
-          encryptionkey: ${{ secrets.pat }}
-          download_upload: upload
+          encryption-key: ${{ secrets.pat }}
+          download-upload: upload
