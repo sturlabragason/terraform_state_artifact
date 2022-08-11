@@ -9,20 +9,26 @@ on:
     - cron:  '11 11 11 * *'
 
 jobs:
-  terraform-download-job:
+  download-apply-upload:
     runs-on: ubuntu-latest
-    name: Downloading Terraform state
     steps:
-      - id: state-download
+      - uses: actions/checkout@v3
+      - name: Download Terraform state
         uses: devgioele/terraform-state-artifact@v3
         with:
           passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
           download-upload: download
-  terraform-upload-job:
-    runs-on: ubuntu-latest
-    name: Uploading Terraform state
-    steps:
-      - id: state-upload
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+      - name: Terraform init
+        run: terraform init
+      - name: Terraform validate
+        run: terraform validate
+      - name: Terraform apply
+        run: terraform apply -auto-approve
+      - id: Upload Terraform state
         uses: devgioele/terraform-state-artifact@v3
         with:
           passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
