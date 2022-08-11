@@ -11,26 +11,26 @@ Be aware that [Github delets artifacts older then 90 days](https://docs.github.c
 ```yaml
 steps:
   - uses: actions/checkout@v3
-    - name: Download Terraform state
-      uses: devgioele/terraform-state-artifact@v4
-      with:
-        passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
-        download_upload: download
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_wrapper: false
-    - name: Terraform init
-      run: terraform init
-    - name: Terraform validate
-      run: terraform validate
-    - name: Terraform apply
-      run: terraform apply -auto-approve -var="run_id=${{ github.run_id }}"
-    - name: Upload Terraform state
-      uses: devgioele/terraform-state-artifact@v4
-      with:
-        passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
-        download_upload: upload
+  - name: Download Terraform state
+    uses: devgioele/terraform-state-artifact@v4
+    with:
+      passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
+      download_upload: download
+  - name: Setup Terraform
+    uses: hashicorp/setup-terraform@v2
+    with:
+      terraform_wrapper: false
+  - name: Terraform init
+    run: terraform init
+  - name: Terraform validate
+    run: terraform validate
+  - name: Terraform apply
+    run: terraform apply -auto-approve -var="run_id=${{ github.run_id }}"
+  - name: Upload Terraform state
+    uses: devgioele/terraform-state-artifact@v4
+    with:
+      passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
+      download_upload: upload
 ```
 
 Generate a secure password and store in a GitHub secret named `TF_STATE_PASSPHRASE`.
