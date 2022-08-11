@@ -28,7 +28,7 @@ jobs:
         run: terraform validate
       - name: Terraform apply
         run: terraform apply -auto-approve
-      - id: Upload Terraform state
+      - name: Upload Terraform state
         uses: devgioele/terraform-state-artifact@v3
         with:
           passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
