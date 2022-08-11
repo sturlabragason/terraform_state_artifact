@@ -16,7 +16,7 @@ jobs:
       - id: state-download
         uses: devgioele/terraform-state-artifact@v3
         with:
-          encryption-key: ${{ secrets.pat }}
+          passphrase: ${{ secrets.TF-STATE-PASSPHRASE }}
           download-upload: download
   terraform-upload-job:
     runs-on: ubuntu-latest

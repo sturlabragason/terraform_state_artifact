@@ -20,7 +20,7 @@ A fix is being searched and you are welcome to open a PR.
 steps:
 - uses: devgioele/terraform-state-artifact@v3
     with:
-        encryption-key: ${{ secrets.TF-STATE-KEY }}
+        passphrase: ${{ secrets.TF-STATE-PASSPHRASE }}
 ```
 
 Using OpenSSL 1.1.1, a key can be generated with:
@@ -28,7 +28,7 @@ Using OpenSSL 1.1.1, a key can be generated with:
 openssl enc -aes-256-cbc -k <secret> -P -md sha256 -pbkdf2
 ```
 Replace `<secret>` with some password.
-Copy the key from the output and use it as a GitHub secret named `TF-STATE-KEY`.
+Copy the key from the output and use it as a GitHub secret named `TF-STATE-PASSPHRASE`.
 
 ## Inputs
 
@@ -36,9 +36,9 @@ The action supports the following inputs:
 
 | Variable        | Description                                                                                                                             | Default |
 |-----------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------|
-| `encryption-key` | An encryption key to use when encrypting the statefile. Recommended to use a secret value.                                              |   N/A   |
+| `passphrase` | A passphrase to encrypt and decrypt the statefile artifact.                       | N/A |
 | `download-upload`         | Whether to download and decrypt or upload and encrypt.               | N/A |
-| `statefile-location`         | (optional) The location of your Terraform statefile.               | `''`  |
+| `statefile-location`         | (optional) The location of your Terraform statefile.              | `''` |
 
 ## Credits
 

@@ -3,8 +3,8 @@ description: 'Downloads and uploads your Terraform statefile as an encrypted Git
 author: 'Sturla Bragason & Gioele De Vitti'
 
 inputs:
-  encryption-key:
-    description: 'Used as a key to encrypt and decrypt the statefile artifact'
+  passphrase:
+    description: 'A passphrase to encrypt and decrypt the statefile artifact.'
     required: true
   download-upload:
     description: 'Whether to download and decrypt or upload and encrypt.'
@@ -32,7 +32,7 @@ runs:
           if ($MostRecentArtifactURI){
             Invoke-RestMethod -uri $MostRecentArtifactURI -Token $Token -Authentication bearer -outfile ./state.zip
             Expand-Archive ./state.zip
-            openssl enc -d -in ./state/terraform.tfstate.enc -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryption-key }}" -out ."${{ inputs.statefile-location }}"/terraform.tfstate
+            gpg --batch --passphrase "${{ inputs.passphrase }}" -o ."${{ inputs.statefile-location }}"/terraform.tfstate -d ./state/terraform.tfstate.enc
           }
         }
       shell: pwsh
@@ -42,7 +42,7 @@ runs:
         $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile-location }}"
         $StateExists = Test-Path -Path ."${{ inputs.statefile-location }}"/terraform.tfstate -PathType Leaf
         if ($StateExists){
-          openssl enc -in ."${{ inputs.statefile-location }}"/terraform.tfstate -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryption-key }}" -out ."${{ inputs.statefile-location }}"/terraform.tfstate.enc
+          gpg --batch --symmetric --cipher-algo aes256 --digest-algo sha256 --passphrase "${{ inputs.passphrase }}" -o ."${{ inputs.statefile-location }}"/terraform.tfstate.enc ."${{ inputs.statefile-location }}"/terraform.tfstate
         }
       shell: pwsh
     - uses: actions/upload-artifact@v3
