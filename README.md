@@ -18,14 +18,12 @@ steps:
       download_upload: download
   - name: Setup Terraform
     uses: hashicorp/setup-terraform@v2
-    with:
-      terraform_wrapper: false
   - name: Terraform init
     run: terraform init
   - name: Terraform validate
     run: terraform validate
   - name: Terraform apply
-    run: terraform apply -auto-approve -var="run_id=${{ github.run_id }}"
+    run: terraform apply -auto-approve
   - name: Upload Terraform state
     uses: devgioele/terraform-state-artifact@v4
     with:
