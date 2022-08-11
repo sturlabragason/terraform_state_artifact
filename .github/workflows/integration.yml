@@ -16,7 +16,7 @@ jobs:
       - id: state-download
         uses: devgioele/terraform-state-artifact@v3
         with:
-          passphrase: ${{ secrets.TF-STATE-PASSPHRASE }}
+          passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
           download-upload: download
   terraform-upload-job:
     runs-on: ubuntu-latest
@@ -25,5 +25,5 @@ jobs:
       - id: state-upload
         uses: devgioele/terraform-state-artifact@v3
         with:
-          passphrase: ${{ secrets.TF-STATE-PASSPHRASE }}
+          passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
           download-upload: upload
