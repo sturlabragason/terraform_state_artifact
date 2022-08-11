@@ -17,7 +17,7 @@ jobs:
         uses: devgioele/terraform-state-artifact@v3
         with:
           passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
-          download-upload: download
+          download_upload: download
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -32,4 +32,4 @@ jobs:
         uses: devgioele/terraform-state-artifact@v3
         with:
           passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
-          download-upload: upload
+          download_upload: upload
