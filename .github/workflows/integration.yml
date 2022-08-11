@@ -1,6 +1,7 @@
 name: Integration test
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
