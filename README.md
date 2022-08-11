@@ -10,9 +10,27 @@ Be aware that [Github delets artifacts older then 90 days](https://docs.github.c
 
 ```yaml
 steps:
-- uses: devgioele/terraform-state-artifact@v3
-    with:
+  - uses: actions/checkout@v3
+    - name: Download Terraform state
+      uses: devgioele/terraform-state-artifact@v4
+      with:
         passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
+        download_upload: download
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_wrapper: false
+    - name: Terraform init
+      run: terraform init
+    - name: Terraform validate
+      run: terraform validate
+    - name: Terraform apply
+      run: terraform apply -auto-approve -var="run_id=${{ github.run_id }}"
+    - name: Upload Terraform state
+      uses: devgioele/terraform-state-artifact@v4
+      with:
+        passphrase: ${{ secrets.TF_STATE_PASSPHRASE }}
+        download_upload: upload
 ```
 
 Generate a secure password and store in a GitHub secret named `TF_STATE_PASSPHRASE`.
@@ -24,8 +42,8 @@ The action supports the following inputs:
 | Variable        | Description                                                                                                                             | Default |
 |-----------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------|
 | `passphrase` | A passphrase to encrypt and decrypt the statefile artifact.                       | N/A |
-| `download-upload`         | Whether to download and decrypt or upload and encrypt.               | N/A |
-| `statefile-location`         | (optional) The location of your Terraform statefile.              | `''` |
+| `download_upload`         | Whether to download and decrypt or upload and encrypt.               | N/A |
+| `statefile_location`         | (optional) The location of your Terraform statefile.              | `''` |
 
 ## Credits
 
