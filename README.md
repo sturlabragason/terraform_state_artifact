@@ -1,7 +1,6 @@
 # terraform-state-artifact
 
 [![Terraform State Artifact](https://github.com/devgioele/terraform-state-artifact/actions/workflows/terraform.yml/badge.svg)](https://github.com/devgioele/terraform-state-artifact/actions/workflows/terraform.yml)
-  `#actionshackathon21`
 
 An action that stores your Terraform state file as an encrypted Github workflow artifact and downloads and decrypts the state on subsequent runs.
 
