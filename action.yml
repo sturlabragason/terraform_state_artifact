@@ -1,28 +1,24 @@
-name: 'terraform_state_artifact'
-description: 'Sets up and runs Terraform, and creates an encrypted Terraform artifact'
-author: 'Sturla Bragason'
+name: terraform-state-artifact
+description: 'Downloads and uploads your Terraform statefile as an encrypted Github Artifact'
+author: 'Sturla Bragason & Gioele De Vitti'
+
 inputs:
-  encryptionkey:
-    description: 'Used to read artifact and as a key to encrypt and decrypt the state file artifact'
+  passphrase:
+    description: 'A passphrase to encrypt and decrypt the statefile artifact.'
     required: true
-  apply:
-    description: 'terraform apply'
-    required: false
-    default: true
-  custom_plan_flags:
-    description: 'Add custom flags to the terraform plan command'
-    required: false
-    default: ''
-  custom_apply_flags:
-    description: 'Add custom flags to the terraform apply command'
+  download_upload:
+    description: 'Whether to download and decrypt or upload and encrypt.'
+    required: true
+  statefile_location:
+    description: 'The location of your Terraform statefile.'
     required: false
     default: ''
+
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v2
-    - uses: hashicorp/setup-terraform@v1
-    - id: terraform
+    - id: terraform-state-artifact-download
+      if: ${{ inputs.download_upload == 'download' }}
       run: |
         $Repo = "${{ github.repository }}"
         $BaseUri = "https://api.github.com"
@@ -30,34 +26,28 @@ runs:
         $Token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText
         $RestResponse = Invoke-RestMethod -Authentication Bearer -Uri $ArtifactUri -Token $Token | Select-Object -ExpandProperty artifacts
         if ($RestResponse){
-          $MostRecentArtifactURI = $RestResponse | Sort-Object -Property created_at -Descending | where name -eq "terraformstatefile" | Select-Object -First 1 | Select-Object -ExpandProperty archive_download_url
+          $MostRecentArtifactURI = $RestResponse | Sort-Object -Property created_at -Descending | where name -eq "terraform-state" | Select-Object -First 1 | Select-Object -ExpandProperty archive_download_url
           Write-Host "Most recent artifact URI = $MostRecentArtifactURI"
           if ($MostRecentArtifactURI){
             Invoke-RestMethod -uri $MostRecentArtifactURI -Token $Token -Authentication bearer -outfile ./state.zip
             Expand-Archive ./state.zip
-            openssl enc -d -in ./state/terraform.tfstate.enc -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ./terraform.tfstate
+            gpg --batch --passphrase ${{ inputs.passphrase }} -o .${{ inputs.statefile_location }}/terraform.tfstate -d ./state/terraform.tfstate.enc
           }
         }
-        terraform init
-        $terraformapply = "${{ inputs.apply }}"
-        $custom_plan_flags = "${{ inputs.custom_plan_flags }}"
-        $custom_apply_flags = "${{ inputs.custom_apply_flags }}"
-        if ($terraformapply -eq "false"){
-          $terraformapply = $false
-        }
-        terraform plan $custom_plan_flags
-        if ($terraformapply){
-          terraform apply -auto-approve $custom_apply_flags
-        }
-        $StateExists = Test-Path -Path ./terraform.tfstate -PathType Leaf
+      shell: pwsh
+    - id: terraform-state-artifact-upload
+      if: ${{ inputs.download_upload == 'upload' }}
+      run: |
+        $StateExists = Test-Path -Path .${{ inputs.statefile_location }}/terraform.tfstate -PathType Leaf
         if ($StateExists){
-          openssl enc -in ./terraform.tfstate -aes-256-cbc -pbkdf2 -pass pass:"${{ inputs.encryptionkey }}" -out ./terraform.tfstate.enc
+          gpg --batch --symmetric --cipher-algo aes256 --digest-algo sha256 --passphrase ${{ inputs.passphrase }} -o .${{ inputs.statefile_location }}/terraform.tfstate.enc .${{ inputs.statefile_location }}/terraform.tfstate
         }
       shell: pwsh
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
+      if: ${{ inputs.download_upload == 'upload' }}
       with:
-        name: terraformstatefile
-        path: ./terraform.tfstate.enc
+        name: terraform-state
+        path: .${{ inputs.statefile_location }}/terraform.tfstate.enc
 branding:
   icon: 'cloud'
   color: 'gray-dark'
