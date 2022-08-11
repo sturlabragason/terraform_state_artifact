@@ -18,7 +18,7 @@ runs:
   using: "composite"
   steps:
     - id: terraform-state-artifact-download
-      if: ${{ github.event.inputs.download_upload == 'download' }}
+      if: ${{ inputs.download_upload == 'download' }}
       run: |
         $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
         $Repo = "${{ github.repository }}"
@@ -37,7 +37,7 @@ runs:
         }
       shell: pwsh
     - id: terraform-state-artifact-upload
-      if: ${{ github.event.inputs.download_upload == 'upload' }}
+      if: ${{ inputs.download_upload == 'upload' }}
       run: |
         $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
         $StateExists = Test-Path -Path ."${{ inputs.statefile_location }}"/terraform.tfstate -PathType Leaf
@@ -46,7 +46,7 @@ runs:
         }
       shell: pwsh
     - uses: actions/upload-artifact@v3
-      if: ${{ github.event.inputs.download_upload == 'upload' }}
+      if: ${{ inputs.download_upload == 'upload' }}
       with:
         name: terraform-state
         path: ."${{ inputs.statefile_location }}"/terraform.tfstate.enc
