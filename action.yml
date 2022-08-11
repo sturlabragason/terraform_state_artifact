@@ -20,14 +20,13 @@ runs:
     - id: terraform-state-artifact-download
       if: ${{ inputs.download_upload == 'download' }}
       run: |
-        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
         $Repo = "${{ github.repository }}"
         $BaseUri = "https://api.github.com"
         $ArtifactUri = "$BaseUri/repos/$Repo/actions/artifacts"
         $Token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText
         $RestResponse = Invoke-RestMethod -Authentication Bearer -Uri $ArtifactUri -Token $Token | Select-Object -ExpandProperty artifacts
         if ($RestResponse){
-          $MostRecentArtifactURI = $RestResponse | Sort-Object -Property created_at -Descending | where name -eq $ArtifactName | Select-Object -First 1 | Select-Object -ExpandProperty archive_download_url
+          $MostRecentArtifactURI = $RestResponse | Sort-Object -Property created_at -Descending | where name -eq "terraform-state" | Select-Object -First 1 | Select-Object -ExpandProperty archive_download_url
           Write-Host "Most recent artifact URI = $MostRecentArtifactURI"
           if ($MostRecentArtifactURI){
             Invoke-RestMethod -uri $MostRecentArtifactURI -Token $Token -Authentication bearer -outfile ./state.zip
@@ -39,7 +38,6 @@ runs:
     - id: terraform-state-artifact-upload
       if: ${{ inputs.download_upload == 'upload' }}
       run: |
-        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
         $StateExists = Test-Path -Path .${{ inputs.statefile_location }}/terraform.tfstate -PathType Leaf
         if ($StateExists){
           gpg --batch --symmetric --cipher-algo aes256 --digest-algo sha256 --passphrase ${{ inputs.passphrase }} -o .${{ inputs.statefile_location }}/terraform.tfstate.enc .${{ inputs.statefile_location }}/terraform.tfstate
