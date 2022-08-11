@@ -20,11 +20,11 @@ runs:
     - id: terraform-state-artifact-download
       if: ${{ inputs.download_upload == 'download' }}
       run: |
-        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
-        $Repo = "${{ github.repository }}"
+        $ArtifactName = ${{ github.ref_name }} + ${{ inputs.statefile_location }}
+        $Repo = ${{ github.repository }}
         $BaseUri = "https://api.github.com"
         $ArtifactUri = "$BaseUri/repos/$Repo/actions/artifacts"
-        $Token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText
+        $Token = ${{ github.token }} | ConvertTo-SecureString -AsPlainText
         $RestResponse = Invoke-RestMethod -Authentication Bearer -Uri $ArtifactUri -Token $Token | Select-Object -ExpandProperty artifacts
         if ($RestResponse){
           $MostRecentArtifactURI = $RestResponse | Sort-Object -Property created_at -Descending | where name -eq $ArtifactName | Select-Object -First 1 | Select-Object -ExpandProperty archive_download_url
@@ -32,24 +32,24 @@ runs:
           if ($MostRecentArtifactURI){
             Invoke-RestMethod -uri $MostRecentArtifactURI -Token $Token -Authentication bearer -outfile ./state.zip
             Expand-Archive ./state.zip
-            gpg --batch --passphrase "${{ inputs.passphrase }}" -o ."${{ inputs.statefile_location }}"/terraform.tfstate -d ./state/terraform.tfstate.enc
+            gpg --batch --passphrase ${{ inputs.passphrase }} -o .${{ inputs.statefile_location }}/terraform.tfstate -d ./state/terraform.tfstate.enc
           }
         }
       shell: pwsh
     - id: terraform-state-artifact-upload
       if: ${{ inputs.download_upload == 'upload' }}
       run: |
-        $ArtifactName = "${{ github.ref_name }}" + "${{ inputs.statefile_location }}"
-        $StateExists = Test-Path -Path ."${{ inputs.statefile_location }}"/terraform.tfstate -PathType Leaf
+        $ArtifactName = ${{ github.ref_name }} + ${{ inputs.statefile_location }}
+        $StateExists = Test-Path -Path .${{ inputs.statefile_location }}/terraform.tfstate -PathType Leaf
         if ($StateExists){
-          gpg --batch --symmetric --cipher-algo aes256 --digest-algo sha256 --passphrase "${{ inputs.passphrase }}" -o ."${{ inputs.statefile_location }}"/terraform.tfstate.enc ."${{ inputs.statefile_location }}"/terraform.tfstate
+          gpg --batch --symmetric --cipher-algo aes256 --digest-algo sha256 --passphrase ${{ inputs.passphrase }} -o .${{ inputs.statefile_location }}/terraform.tfstate.enc .${{ inputs.statefile_location }}/terraform.tfstate
         }
       shell: pwsh
     - uses: actions/upload-artifact@v3
       if: ${{ inputs.download_upload == 'upload' }}
       with:
         name: terraform-state
-        path: ."${{ inputs.statefile_location }}"/terraform.tfstate.enc
+        path: .${{ inputs.statefile_location }}/terraform.tfstate.enc
 branding:
   icon: 'cloud'
   color: 'gray-dark'
