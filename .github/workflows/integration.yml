@@ -1,4 +1,4 @@
-name: Terraform State Artifact
+name: Integration test
 
 on:
   push:
